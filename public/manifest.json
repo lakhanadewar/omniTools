@@ -1,0 +1,26 @@
+
+{
+  "name": "OmniTool - All-in-one Utility",
+  "short_name": "OmniTool",
+  "description": "OmniTool is an all-in-one utility application providing a suite of helpful tools.",
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EEEEEE",
+  "theme_color": "#2196F3",
+  "scope": "/",
+  "orientation": "portrait-primary"
+}
