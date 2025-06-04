@@ -1,4 +1,3 @@
-
 "use client";
 import Link from 'next/link';
 import type { FC } from 'react';
@@ -20,7 +19,7 @@ interface ToolCardProps {
 
 const ToolCard: FC<ToolCardProps> = ({ id, name, description, icon: Icon, isFavorite, onToggleFavorite, path }) => {
   return (
-    <Card className="shadow-lg hover:shadow-xl transition-shadow duration-200 flex flex-col h-full">
+    <Card className="shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col h-full hover:scale-105">
       <CardHeader className="flex flex-row items-start justify-between pb-2 space-y-0">
         <div className="space-y-1 flex-grow">
           <CardTitle className="text-xl font-semibold font-headline flex items-center">
