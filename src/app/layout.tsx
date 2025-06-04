@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: 'OmniTool',
   description: 'All-in-one utility application',
   manifest: '/manifest.json', // Added for PWA
+  themeColor: '#2196F3', // Moved theme-color here
 };
 
 export default function RootLayout({
@@ -20,9 +21,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
-        {/* Link to manifest.json for PWA capabilities - can also be in Metadata */}
-        {/* <link rel="manifest" href="/manifest.json" /> */} 
-        <meta name="theme-color" content="#2196F3" /> {/* Theme color for PWA */}
+        {/* The manifest link is handled by metadata.manifest */}
+        {/* The theme-color meta tag is now handled by metadata.themeColor */}
       </head>
       <body className="font-body antialiased">
         {children}
