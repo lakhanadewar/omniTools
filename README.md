@@ -102,7 +102,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` file for more information (if one exists, otherwise, you might want to add one).
+Distributed under the MIT License. See `LICENSE` file for more information.
 
 ## Acknowledgements
 
@@ -111,6 +111,3 @@ Distributed under the MIT License. See `LICENSE` file for more information (if o
 *   Lucide Icons for the clean icon set
 *   The Next.js and React teams
 
----
-
-This README provides a good overview for anyone visiting your project on GitHub.
