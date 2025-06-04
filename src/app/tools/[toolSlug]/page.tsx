@@ -71,7 +71,7 @@ const ToolPage: NextPage = () => {
      return (
        <div className="flex min-h-screen flex-col">
          <AppHeader />
-         <main className="flex-1 p-4 md:p-8 flex items-center justify-center">
+         <main className="flex-1 p-4 md:p-6 lg:p-8 flex items-center justify-center">
            <p>Loading page...</p>
          </main>
        </div>
@@ -82,7 +82,7 @@ const ToolPage: NextPage = () => {
     return (
       <div className="flex min-h-screen flex-col">
         <AppHeader />
-        <main className="flex-1 p-4 md:p-8 flex flex-col items-center justify-center text-center">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 flex flex-col items-center justify-center text-center">
           <h1 className="text-2xl font-bold mb-4">Tool Not Found</h1>
           <p className="text-muted-foreground mb-6">The tool you are looking for does not exist or could not be loaded.</p>
           <Button asChild>
@@ -98,7 +98,7 @@ const ToolPage: NextPage = () => {
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader />
-      <main className="flex-1 p-4 md:p-8">
+      <main className="flex-1 p-4 md:p-6 lg:p-8">
         <div className="mb-6 flex items-center gap-4">
           <Button variant="outline" size="icon" asChild>
             <Link href="/">

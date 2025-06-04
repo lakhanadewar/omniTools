@@ -6,7 +6,7 @@ import Link from 'next/link';
 export function AppHeader() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="container flex h-16 items-center justify-between max-w-screen-xl mx-auto px-4">
         <Link href="/" passHref>
           <h1 className="text-2xl font-bold font-headline text-primary cursor-pointer">OmniTool</h1>
         </Link>
