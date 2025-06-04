@@ -23,7 +23,11 @@ const BarcodeReaderTool: FC = () => {
   useEffect(() => {
     codeReaderRef.current = new BrowserMultiFormatReader();
     return () => {
-      codeReaderRef.current?.reset();
+      if (codeReaderRef.current && typeof codeReaderRef.current.reset === 'function') {
+        codeReaderRef.current.reset();
+      } else if (codeReaderRef.current) {
+        console.warn('[BarcodeReaderTool] codeReaderRef.current.reset is not a function during main effect cleanup. Current ref:', codeReaderRef.current);
+      }
     };
   }, []);
 
@@ -62,7 +66,11 @@ const BarcodeReaderTool: FC = () => {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach(track => track.stop());
       }
-      codeReaderRef.current?.reset();
+      if (codeReaderRef.current && typeof codeReaderRef.current.reset === 'function') {
+        codeReaderRef.current.reset();
+      } else if (codeReaderRef.current) {
+         console.warn('[BarcodeReaderTool] codeReaderRef.current.reset is not a function during camera effect cleanup. Current ref:', codeReaderRef.current);
+      }
     };
   }, [toast]);
 
@@ -81,20 +89,25 @@ const BarcodeReaderTool: FC = () => {
     toast({ title: "Scanning...", description: "Attempting to read barcode." });
 
     try {
-      const result = await codeReaderRef.current.decodeOnceFromVideoElement(videoRef.current);
-      if (result) {
-        setScannedData(result.getText());
-        toast({
-          title: "Barcode Scanned!",
-          description: `Data: ${result.getText()}`,
-        });
+      // Ensure codeReaderRef.current exists and has decodeOnceFromVideoElement method
+      if (codeReaderRef.current && typeof codeReaderRef.current.decodeOnceFromVideoElement === 'function') {
+        const result = await codeReaderRef.current.decodeOnceFromVideoElement(videoRef.current);
+        if (result) {
+          setScannedData(result.getText());
+          toast({
+            title: "Barcode Scanned!",
+            description: `Data: ${result.getText()}`,
+          });
+        } else {
+          setScannedData("No barcode found.");
+           toast({
+            title: "Scan Complete",
+            description: "No barcode was detected.",
+            variant: "default" 
+          });
+        }
       } else {
-        setScannedData("No barcode found.");
-         toast({
-          title: "Scan Complete",
-          description: "No barcode was detected.",
-          variant: "default" 
-        });
+        throw new Error("Barcode reader is not properly initialized.");
       }
     } catch (error) {
       console.error("Barcode scanning error:", error);
@@ -104,11 +117,18 @@ const BarcodeReaderTool: FC = () => {
           title: "Scan Complete",
           description: "No barcode was detected.",
         });
+      } else if (error instanceof Error) {
+        setScannedData(`Error: ${error.message}`);
+        toast({
+          title: "Scanning Error",
+          description: error.message || "An error occurred while trying to scan.",
+          variant: "destructive",
+        });
       } else {
         setScannedData("Error scanning barcode.");
         toast({
           title: "Scanning Error",
-          description: "An error occurred while trying to scan.",
+          description: "An unknown error occurred while trying to scan.",
           variant: "destructive",
         });
       }
@@ -120,8 +140,12 @@ const BarcodeReaderTool: FC = () => {
   const resetScanner = () => {
     setScannedData("");
     setIsScanning(false);
-    codeReaderRef.current?.reset();
-     toast({ title: "Scanner Reset", description: "Ready for a new scan." });
+    if (codeReaderRef.current && typeof codeReaderRef.current.reset === 'function') {
+      codeReaderRef.current.reset();
+    } else if (codeReaderRef.current) {
+      console.warn('[BarcodeReaderTool] codeReaderRef.current.reset is not a function in resetScanner. Current ref:', codeReaderRef.current);
+    }
+    toast({ title: "Scanner Reset", description: "Ready for a new scan." });
   }
 
   return (
