@@ -5,7 +5,9 @@ import { useState, useEffect, useRef, type FC } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ZoomIn, Camera, AlertTriangle } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { ZoomIn, Camera, AlertTriangle, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const MagnifierTool: FC = () => {
@@ -52,17 +54,22 @@ const MagnifierTool: FC = () => {
     };
   }, [toast]);
 
-  const startMagnifier = () => {
-    // Placeholder: In a real app, this might interact with canvas for zooming or apply digital zoom if supported.
-    // For this example, we'll just cycle through some CSS zoom levels on the video element.
-    const newZoomLevel = zoomLevel >= 3 ? 1 : zoomLevel + 0.5;
+  const handleZoomChange = (value: number[]) => {
+    const newZoomLevel = value[0];
     setZoomLevel(newZoomLevel);
     if (videoRef.current) {
         videoRef.current.style.transform = `scale(${newZoomLevel})`;
     }
+  };
+
+  const resetZoom = () => {
+    setZoomLevel(1);
+    if (videoRef.current) {
+        videoRef.current.style.transform = `scale(1)`;
+    }
     toast({
-      title: "Magnifier Zoom",
-      description: `Zoom level: ${newZoomLevel}x. Actual advanced magnification may require more complex implementation.`,
+      title: "Zoom Reset",
+      description: "Zoom level has been reset to 1x.",
     });
   };
 
@@ -76,7 +83,7 @@ const MagnifierTool: FC = () => {
         <div className="aspect-video bg-muted rounded-md flex flex-col items-center justify-center overflow-hidden relative">
           <video 
             ref={videoRef} 
-            className="w-full h-full object-cover transition-transform duration-300" 
+            className="w-full h-full object-cover transition-transform duration-100 ease-linear" 
             autoPlay 
             muted 
             playsInline 
@@ -100,12 +107,28 @@ const MagnifierTool: FC = () => {
           </Alert>
         )}
         
-        <Button onClick={startMagnifier} className="w-full" disabled={hasCameraPermission !== true}>
-          {zoomLevel > 1 ? `Zoom: ${zoomLevel}x (Click to cycle)` : "Toggle Zoom"}
-        </Button>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="zoom-slider">Zoom Level: {zoomLevel.toFixed(1)}x</Label>
+            <Button onClick={resetZoom} variant="ghost" size="sm" disabled={hasCameraPermission !== true || zoomLevel === 1}>
+              <RotateCcw className="mr-1 h-3 w-3" /> Reset
+            </Button>
+          </div>
+          <Slider
+            id="zoom-slider"
+            min={1}
+            max={5}
+            step={0.1}
+            value={[zoomLevel]}
+            onValueChange={handleZoomChange}
+            disabled={hasCameraPermission !== true}
+            className="w-full"
+          />
+        </div>
+        
         <div className="flex items-start text-sm text-muted-foreground p-3 bg-muted rounded-md">
           <AlertTriangle className="h-5 w-5 mr-2 mt-0.5 shrink-0 text-destructive" />
-          <p>This tool uses your device's camera. The zoom is a basic CSS scale. Advanced magnification may need canvas or other techniques.</p>
+          <p>This tool uses your device's camera. The zoom is a basic CSS scale effect.</p>
         </div>
       </CardContent>
     </Card>

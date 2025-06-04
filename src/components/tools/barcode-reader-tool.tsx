@@ -1,20 +1,31 @@
 
 "use client";
 
-import { useState, useEffect, useRef, type FC } from 'react';
+import { useState, useEffect, useRef, type FC, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ScanLine, Camera, AlertTriangle } from "lucide-react";
+import { ScanLine, Camera, AlertTriangle, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { BrowserMultiFormatReader } from '@zxing/browser';
+import { NotFoundException } from '@zxing/library';
 
 const BarcodeReaderTool: FC = () => {
   const [scannedData, setScannedData] = useState<string>("");
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  useEffect(() => {
+    codeReaderRef.current = new BrowserMultiFormatReader();
+    return () => {
+      codeReaderRef.current?.reset();
+    };
+  }, []);
 
   useEffect(() => {
     const getCameraPermission = async () => {
@@ -51,17 +62,67 @@ const BarcodeReaderTool: FC = () => {
         const stream = videoRef.current.srcObject as MediaStream;
         stream.getTracks().forEach(track => track.stop());
       }
+      codeReaderRef.current?.reset();
     };
   }, [toast]);
 
-  const startScanning = () => {
-    toast({
-      title: "Barcode Scanning (Placeholder)",
-      description: "Actual barcode scanning from the camera feed requires a dedicated library.",
-    });
-    // Simulate a scan if needed for placeholder
-    setScannedData(`SimulatedScan-${Date.now()}`);
-  };
+  const startScanning = useCallback(async () => {
+    if (!videoRef.current || !codeReaderRef.current || hasCameraPermission !== true) {
+      toast({
+        title: "Scanning Error",
+        description: "Camera not ready or permissions not granted.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setScannedData(""); 
+    setIsScanning(true);
+    toast({ title: "Scanning...", description: "Attempting to read barcode." });
+
+    try {
+      const result = await codeReaderRef.current.decodeOnceFromVideoElement(videoRef.current);
+      if (result) {
+        setScannedData(result.getText());
+        toast({
+          title: "Barcode Scanned!",
+          description: `Data: ${result.getText()}`,
+        });
+      } else {
+        setScannedData("No barcode found.");
+         toast({
+          title: "Scan Complete",
+          description: "No barcode was detected.",
+          variant: "default" 
+        });
+      }
+    } catch (error) {
+      console.error("Barcode scanning error:", error);
+      if (error instanceof NotFoundException) {
+        setScannedData("No barcode found.");
+        toast({
+          title: "Scan Complete",
+          description: "No barcode was detected.",
+        });
+      } else {
+        setScannedData("Error scanning barcode.");
+        toast({
+          title: "Scanning Error",
+          description: "An error occurred while trying to scan.",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsScanning(false);
+    }
+  }, [hasCameraPermission, toast]);
+
+  const resetScanner = () => {
+    setScannedData("");
+    setIsScanning(false);
+    codeReaderRef.current?.reset();
+     toast({ title: "Scanner Reset", description: "Ready for a new scan." });
+  }
 
   return (
     <Card className="shadow-lg">
@@ -95,12 +156,17 @@ const BarcodeReaderTool: FC = () => {
           <Label htmlFor="scannedData">Scanned Data</Label>
           <Input id="scannedData" type="text" value={scannedData} readOnly placeholder="Barcode data will appear here" />
         </div>
-        <Button onClick={startScanning} className="w-full" disabled={hasCameraPermission !== true}>
-          Scan Barcode
-        </Button>
+        <div className="grid grid-cols-2 gap-2">
+          <Button onClick={startScanning} className="w-full" disabled={hasCameraPermission !== true || isScanning}>
+            {isScanning ? "Scanning..." : "Scan Barcode"}
+          </Button>
+          <Button onClick={resetScanner} variant="outline" disabled={isScanning}>
+            <RotateCcw className="mr-2 h-4 w-4" /> Reset
+          </Button>
+        </div>
         <div className="flex items-start text-sm text-muted-foreground p-3 bg-muted rounded-md">
          <AlertTriangle className="h-5 w-5 mr-2 mt-0.5 shrink-0 text-destructive" />
-          <p>This tool uses your device's camera. Actual barcode scanning requires a barcode scanning library.</p>
+          <p>This tool uses your device's camera and @zxing/browser library for barcode detection.</p>
         </div>
       </CardContent>
     </Card>
