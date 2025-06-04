@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, type FC } from 'react';
@@ -38,17 +39,42 @@ const FlashlightTool: FC = () => {
           }
         });
         const track = mediaStream.getVideoTracks()[0];
-        if (track && typeof track.applyConstraints === 'function') {
-          await track.applyConstraints({ advanced: [{ torch: true }] });
-          setStream(mediaStream);
-          setIsOn(true);
-          toast({ title: "Flashlight On" });
+
+        if (track) {
+          const capabilities = track.getCapabilities();
+          if (capabilities && capabilities.torch) { // Check if torch capability exists and is true
+            if (typeof track.applyConstraints === 'function') {
+              await track.applyConstraints({ advanced: [{ torch: true }] });
+              setStream(mediaStream);
+              setIsOn(true);
+              toast({ title: "Flashlight On" });
+            } else {
+              toast({
+                title: "Flashlight Error",
+                description: "Torch control function (applyConstraints) not available on this track.",
+                variant: "destructive",
+              });
+              mediaStream.getTracks().forEach(t => t.stop()); // Clean up
+            }
+          } else {
+            // Torch capability not supported
+            toast({
+              title: "Flashlight Not Supported",
+              description: "This device's camera does not support flashlight (torch) control.",
+              variant: "destructive",
+            });
+            mediaStream.getTracks().forEach(t => t.stop()); // Clean up
+          }
         } else {
+          // No video track found
           toast({
-            title: "Flashlight Error",
-            description: "Could not access torch functionality.",
+            title: "Camera Error",
+            description: "No suitable camera track found to control flashlight.",
             variant: "destructive",
           });
+          if (mediaStream) { // If stream was obtained but no track
+            mediaStream.getTracks().forEach(t => t.stop());
+          }
         }
       }
     } catch (err) {
@@ -60,15 +86,21 @@ const FlashlightTool: FC = () => {
         } else if (err.name === "NotFoundError" || err.name === "DevicesNotFoundError") {
           description = "No suitable camera found for flashlight.";
         } else if (err.name === "OverconstrainedError" || err.name === "ConstraintNotSatisfiedError") {
-           description = "Flashlight (torch) not supported on this camera/device.";
+           description = "Flashlight (torch) constraint failed. The camera may not support it or another issue occurred.";
+        } else if (err.name === "NotReadableError") {
+            description = "Cannot access camera. It might be in use by another app, a hardware issue, or a browser permissions problem.";
+        } else {
+            description = `An unexpected camera/flashlight error occurred: ${err.message || err.name}`;
         }
+      } else {
+        description = "An unknown error occurred while trying to access the flashlight.";
       }
       toast({
         title: "Flashlight Error",
         description: description,
         variant: "destructive",
       });
-      if (stream) { // clean up stream if error occurred during turn on
+      if (stream) { 
         stream.getTracks().forEach(track => track.stop());
         setStream(null);
       }
@@ -89,8 +121,8 @@ const FlashlightTool: FC = () => {
         <Button onClick={toggleFlashlight} className="w-full">
           {isOn ? "Turn Off" : "Turn On"}
         </Button>
-        <div className="flex items-center text-sm text-muted-foreground p-3 bg-muted rounded-md">
-          <AlertTriangle className="h-5 w-5 mr-2 text-destructive" />
+        <div className="flex items-start text-sm text-muted-foreground p-3 bg-muted rounded-md">
+          <AlertTriangle className="h-5 w-5 mr-2 mt-0.5 shrink-0 text-destructive" />
           <p>Uses device camera flash. Availability depends on your device and browser support for torch control.</p>
         </div>
       </CardContent>
