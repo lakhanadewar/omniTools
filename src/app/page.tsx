@@ -1,56 +1,82 @@
 
+"use client";
 import { AppHeader } from "@/components/layout/app-header";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import UnitConverterTool from "@/components/tools/unit-converter-tool";
-import AreaConverterTool from "@/components/tools/area-converter-tool";
-import VolumeCalculatorTool from "@/components/tools/volume-calculator-tool";
-import CalculatorTool from "@/components/tools/calculator-tool";
-import TimerTool from "@/components/tools/timer-tool";
-import StopwatchTool from "@/components/tools/stopwatch-tool";
-import RulerTool from "@/components/tools/ruler-tool";
-import LevelerTool from "@/components/tools/leveler-tool";
-import HeightMeasurementTool from "@/components/tools/height-measurement-tool";
-import FlashlightTool from "@/components/tools/flashlight-tool";
-import QRCodeGeneratorTool from "@/components/tools/qr-code-generator-tool";
-import MagnifierTool from "@/components/tools/magnifier-tool";
-import ColorDetectorTool from "@/components/tools/color-detector-tool";
-import QRCodeReaderTool from "@/components/tools/qr-code-reader-tool";
+import ToolCard from "@/components/tools/tool-card";
+import { TOOLS_CONFIG_WITH_DETAILS } from "@/lib/tools";
+import { useFavorites } from "@/hooks/use-favorites";
+import { Separator } from "@/components/ui/separator";
+import { useEffect, useState } from 'react';
 
 export default function Home() {
+  const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const favoriteTools = TOOLS_CONFIG_WITH_DETAILS.filter(tool => favorites.includes(tool.id));
+  const otherTools = TOOLS_CONFIG_WITH_DETAILS.filter(tool => !favorites.includes(tool.id));
+
+  if (!isClient) {
+    // Render a loading state or null until the client has mounted
+    // This helps avoid hydration mismatches with localStorage
+    return (
+      <div className="flex min-h-screen flex-col">
+        <AppHeader />
+        <main className="flex-1 p-4 md:p-8">
+          <div className="text-center py-10">Loading tools...</div>
+        </main>
+        <footer className="py-6 text-center text-sm text-muted-foreground">
+          © {new Date().getFullYear()} OmniTool. All rights reserved.
+        </footer>
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <AppHeader />
       <main className="flex-1 p-4 md:p-8">
-        <Tabs defaultValue="converters-calculators" className="w-full">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 mb-6">
-            <TabsTrigger value="converters-calculators">Converters & Calculators</TabsTrigger>
-            <TabsTrigger value="timers-measurement">Timers & Measurement</TabsTrigger>
-            <TabsTrigger value="device-tools">Device Tools</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="converters-calculators" className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <UnitConverterTool />
-            <AreaConverterTool />
-            <VolumeCalculatorTool />
-            <CalculatorTool />
-          </TabsContent>
-          
-          <TabsContent value="timers-measurement" className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <TimerTool />
-            <StopwatchTool />
-            <RulerTool />
-            <LevelerTool />
-            <HeightMeasurementTool />
-          </TabsContent>
-          
-          <TabsContent value="device-tools" className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <FlashlightTool />
-            <QRCodeGeneratorTool />
-            <MagnifierTool />
-            <ColorDetectorTool />
-            <QRCodeReaderTool />
-          </TabsContent>
-        </Tabs>
+        {favoriteTools.length > 0 && (
+          <>
+            <h2 className="text-2xl font-bold font-headline text-primary mb-6">Favorite Tools</h2>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-10">
+              {favoriteTools.map((tool) => (
+                <ToolCard
+                  key={tool.id}
+                  id={tool.id}
+                  name={tool.name}
+                  description={tool.description}
+                  icon={tool.icon}
+                  isFavorite={isFavorite(tool.id)}
+                  onToggleFavorite={toggleFavorite}
+                  path={tool.path}
+                />
+              ))}
+            </div>
+            <Separator className="my-10" />
+          </>
+        )}
+
+        <h2 className="text-2xl font-bold font-headline text-primary mb-6">
+          {favoriteTools.length > 0 ? "All Tools" : "Tools"}
+        </h2>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {otherTools.map((tool) => (
+            <ToolCard
+              key={tool.id}
+              id={tool.id}
+              name={tool.name}
+              description={tool.description}
+              icon={tool.icon}
+              isFavorite={isFavorite(tool.id)}
+              onToggleFavorite={toggleFavorite}
+              path={tool.path}
+            />
+          ))}
+           {TOOLS_CONFIG_WITH_DETAILS.length === 0 && <p>No tools available.</p>}
+        </div>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground">
         © {new Date().getFullYear()} OmniTool. All rights reserved.

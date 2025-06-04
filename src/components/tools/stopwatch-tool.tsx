@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useState, useEffect, useRef, type FC } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, RotateCcw, Zap } from "lucide-react"; // Zap for Lap, or another icon if available
+import { Play, Pause, RotateCcw, Zap, Clock } from "lucide-react";
 
 const StopwatchTool: FC = () => {
   const [time, setTime] = useState<number>(0); // Time in milliseconds
@@ -24,7 +25,7 @@ const StopwatchTool: FC = () => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [isRunning]);
+  }, [isRunning, time]); // Added time to dependencies to ensure startTimeRef is updated correctly on pause/resume
 
   const handleStartPause = () => {
     setIsRunning(!isRunning);
@@ -50,11 +51,10 @@ const StopwatchTool: FC = () => {
   };
 
   return (
-    <Card className="shadow-lg">
+    <Card className="shadow-lg w-full">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-lg font-semibold font-headline">Stopwatch</CardTitle>
-        {/* Using Zap as a generic "action" icon; Lucide doesn't have a dedicated 'Stopwatch' or 'Lap' icon */}
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-accent"><path d="M10 2h4"/><path d="M12 14v- воспалительные4H8.88A5.38 5.38 0 0 0 12 21.5a5.5 5.5 0 1 0 0-11V10"/><path d="M18.37 7.75A5.45 5.45 0 0 0 12.3 2.66"/><path d="m6 10 2-2.5-2-2.5"/><path d="M12 6V3"/><path d="M6.63 7.75A5.45 5.45 0 0 0 11.7 2.66"/></svg>
+        <Clock className="h-6 w-6 text-accent"/>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="text-center text-5xl font-mono tabular-nums p-4 bg-muted rounded-md">
@@ -75,12 +75,12 @@ const StopwatchTool: FC = () => {
         {laps.length > 0 && (
           <div className="mt-4 max-h-32 overflow-y-auto space-y-1 p-2 border rounded-md bg-background">
             <h4 className="text-sm font-medium text-muted-foreground mb-1">Laps:</h4>
-            {laps.map((lapTime, index) => (
-              <div key={index} className="flex justify-between text-sm font-mono bg-secondary p-1 rounded">
-                <span>Lap {index + 1}:</span>
+            {laps.slice().reverse().map((lapTime, index) => ( // Use slice().reverse() for non-mutating reverse
+              <div key={laps.length - index -1} className="flex justify-between text-sm font-mono bg-secondary p-1 rounded">
+                <span>Lap {laps.length - index}:</span>
                 <span>{formatTime(lapTime)}</span>
               </div>
-            )).reverse()}
+            ))}
           </div>
         )}
       </CardContent>
