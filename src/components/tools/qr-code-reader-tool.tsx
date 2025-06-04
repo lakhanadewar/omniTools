@@ -7,12 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ScanLine, Camera, AlertTriangle, RotateCcw } from "lucide-react"; // This file will be deleted but change required to prevent conflicts
+import { ScanLine, Camera, AlertTriangle, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
 
-
-const BarcodeReaderTool: FC = () => {
+const QRCodeReaderTool: FC = () => {
   const [scannedData, setScannedData] = useState<string>("");
   const { toast } = useToast();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -26,7 +25,7 @@ const BarcodeReaderTool: FC = () => {
       if (codeReaderRef.current && typeof codeReaderRef.current.reset === 'function') {
         codeReaderRef.current.reset();
       } else if (codeReaderRef.current) {
-        console.warn('[BarcodeReaderTool] codeReaderRef.current.reset is not a function during main effect cleanup. Current ref:', codeReaderRef.current);
+         console.warn('[QRCodeReaderTool] codeReaderRef.current.reset is not a function during main effect cleanup. Current ref:', codeReaderRef.current);
       }
     };
   }, []);
@@ -69,7 +68,7 @@ const BarcodeReaderTool: FC = () => {
       if (codeReaderRef.current && typeof codeReaderRef.current.reset === 'function') {
         codeReaderRef.current.reset();
       } else if (codeReaderRef.current) {
-         console.warn('[BarcodeReaderTool] codeReaderRef.current.reset is not a function during camera effect cleanup. Current ref:', codeReaderRef.current);
+         console.warn('[QRCodeReaderTool] codeReaderRef.current.reset is not a function during camera effect cleanup. Current ref:', codeReaderRef.current);
       }
     };
   }, [toast]);
@@ -86,36 +85,35 @@ const BarcodeReaderTool: FC = () => {
     
     setScannedData(""); 
     setIsScanning(true);
-    toast({ title: "Scanning...", description: "Attempting to read barcode." });
+    toast({ title: "Scanning for QR Code...", description: "Attempting to read QR code." });
 
     try {
-      // Ensure codeReaderRef.current exists and has decodeOnceFromVideoElement method
       if (codeReaderRef.current && typeof codeReaderRef.current.decodeOnceFromVideoElement === 'function') {
         const result = await codeReaderRef.current.decodeOnceFromVideoElement(videoRef.current);
         if (result) {
           setScannedData(result.getText());
           toast({
-            title: "Barcode Scanned!",
+            title: "QR Code Scanned!",
             description: `Data: ${result.getText()}`,
           });
         } else {
-          setScannedData("No barcode found.");
+          setScannedData("No QR code found.");
            toast({
             title: "Scan Complete",
-            description: "No barcode was detected.",
+            description: "No QR code was detected.",
             variant: "default" 
           });
         }
       } else {
-        throw new Error("Barcode reader is not properly initialized.");
+        throw new Error("QR code reader is not properly initialized.");
       }
     } catch (error) {
-      console.error("Barcode scanning error:", error);
+      console.error("QR Code scanning error:", error);
       if (error instanceof NotFoundException) {
-        setScannedData("No barcode found.");
+        setScannedData("No QR code found.");
         toast({
           title: "Scan Complete",
-          description: "No barcode was detected.",
+          description: "No QR code was detected.",
         });
       } else if (error instanceof Error) {
         setScannedData(`Error: ${error.message}`);
@@ -125,7 +123,7 @@ const BarcodeReaderTool: FC = () => {
           variant: "destructive",
         });
       } else {
-        setScannedData("Error scanning barcode.");
+        setScannedData("Error scanning QR code.");
         toast({
           title: "Scanning Error",
           description: "An unknown error occurred while trying to scan.",
@@ -143,7 +141,7 @@ const BarcodeReaderTool: FC = () => {
     if (codeReaderRef.current && typeof codeReaderRef.current.reset === 'function') {
       codeReaderRef.current.reset();
     } else if (codeReaderRef.current) {
-      console.warn('[BarcodeReaderTool] codeReaderRef.current.reset is not a function in resetScanner. Current ref:', codeReaderRef.current);
+      console.warn('[QRCodeReaderTool] codeReaderRef.current.reset is not a function in resetScanner. Current ref:', codeReaderRef.current);
     }
     toast({ title: "Scanner Reset", description: "Ready for a new scan." });
   }
@@ -151,7 +149,7 @@ const BarcodeReaderTool: FC = () => {
   return (
     <Card className="shadow-lg">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg font-semibold font-headline">Barcode Reader</CardTitle>
+        <CardTitle className="text-lg font-semibold font-headline">QR Code Reader</CardTitle>
         <ScanLine className="h-6 w-6 text-accent" />
       </CardHeader>
       <CardContent className="space-y-4">
@@ -177,12 +175,12 @@ const BarcodeReaderTool: FC = () => {
         )}
 
         <div>
-          <Label htmlFor="scannedData">Scanned Data</Label>
-          <Input id="scannedData" type="text" value={scannedData} readOnly placeholder="Barcode data will appear here" />
+          <Label htmlFor="scannedQrData">Scanned Data</Label>
+          <Input id="scannedQrData" type="text" value={scannedData} readOnly placeholder="QR code data will appear here" />
         </div>
         <div className="grid grid-cols-2 gap-2">
           <Button onClick={startScanning} className="w-full" disabled={hasCameraPermission !== true || isScanning}>
-            {isScanning ? "Scanning..." : "Scan Barcode"}
+            {isScanning ? "Scanning..." : "Scan QR Code"}
           </Button>
           <Button onClick={resetScanner} variant="outline" disabled={isScanning}>
             <RotateCcw className="mr-2 h-4 w-4" /> Reset
@@ -190,11 +188,11 @@ const BarcodeReaderTool: FC = () => {
         </div>
         <div className="flex items-start text-sm text-muted-foreground p-3 bg-muted rounded-md">
          <AlertTriangle className="h-5 w-5 mr-2 mt-0.5 shrink-0 text-destructive" />
-          <p>This tool uses your device's camera and @zxing/browser library for barcode detection.</p>
+          <p>This tool uses your device's camera and @zxing/library for QR code detection.</p>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-export default BarcodeReaderTool;
+export default QRCodeReaderTool;

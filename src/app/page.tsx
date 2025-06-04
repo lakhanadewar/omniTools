@@ -1,3 +1,4 @@
+
 import { AppHeader } from "@/components/layout/app-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import UnitConverterTool from "@/components/tools/unit-converter-tool";
@@ -10,10 +11,10 @@ import RulerTool from "@/components/tools/ruler-tool";
 import LevelerTool from "@/components/tools/leveler-tool";
 import HeightMeasurementTool from "@/components/tools/height-measurement-tool";
 import FlashlightTool from "@/components/tools/flashlight-tool";
-import BarcodeGeneratorTool from "@/components/tools/barcode-generator-tool";
+import QRCodeGeneratorTool from "@/components/tools/qr-code-generator-tool";
 import MagnifierTool from "@/components/tools/magnifier-tool";
 import ColorDetectorTool from "@/components/tools/color-detector-tool";
-import BarcodeReaderTool from "@/components/tools/barcode-reader-tool";
+import QRCodeReaderTool from "@/components/tools/qr-code-reader-tool";
 
 export default function Home() {
   return (
@@ -44,10 +45,10 @@ export default function Home() {
           
           <TabsContent value="device-tools" className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <FlashlightTool />
-            <BarcodeGeneratorTool />
+            <QRCodeGeneratorTool />
             <MagnifierTool />
             <ColorDetectorTool />
-            <BarcodeReaderTool />
+            <QRCodeReaderTool />
           </TabsContent>
         </Tabs>
       </main>
