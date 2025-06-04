@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type FC } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button"; // Added import
 import { Gauge, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
