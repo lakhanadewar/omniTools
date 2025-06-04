@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, type FC } from 'react';
+import { useState, useEffect, useCallback, type FC } from 'react';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -14,7 +15,7 @@ const BarcodeGeneratorTool: FC = () => {
   const [barcodeUrl, setBarcodeUrl] = useState<string>("");
   const { toast } = useToast();
 
-  const generateBarcode = () => {
+  const generateBarcode = useCallback(() => {
     if (!data.trim()) {
       toast({ title: "Error", description: "Please enter data for the barcode.", variant: "destructive" });
       return;
@@ -25,12 +26,12 @@ const BarcodeGeneratorTool: FC = () => {
     const placeholderUrl = `https://placehold.co/300x100.png?text=Barcode:${encodeURIComponent(data)}`;
     setBarcodeUrl(placeholderUrl);
     toast({ title: "Barcode Generated (Placeholder)", description: "A placeholder image is shown." });
-  };
+  }, [data, toast]);
   
   // Generate a default barcode on initial load
-  useState(() => {
+  useEffect(() => {
     generateBarcode();
-  });
+  }, [generateBarcode]);
 
 
   return (
